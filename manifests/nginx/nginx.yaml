@@ -1,33 +1,66 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: my-nginx
-spec:
-  selector:
-    matchLabels:
-      run: my-nginx
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        run: my-nginx
-    spec:
-      containers:
-        - name: my-nginx
-          image: nginx
-          ports:
-            - containerPort: 80
+  name: erog-app
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-nginx
-  labels:
-    run: my-nginx
+  name: erog-app-svc
+  namespace: erog-app
 spec:
   ports:
     - port: 80
-      protocol: TCP
-  type: LoadBalancer
+      targetPort: 80
   selector:
-    run: my-nginx
+    app: erog-app
+  type: ClusterIP
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: erog-app-ingress
+  namespace: erog-app
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging-dns
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - nginx.k8s.staging.learncloud.ga # This should match a DNS name in the Certificate
+      secretName: nginx-tls # This should match the Certificate secretName
+  rules:
+    - host: nginx.k8s.staging.learncloud.ga
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: erog-app-svc
+                port:
+                  number: 80
+            path: /
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erog-app
+  namespace: erog-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: erog-app
+  template:
+    metadata:
+      labels:
+        app: erog-app
+    spec:
+      containers:
+        - name: erog-app
+          image: nginx
+          ports:
+            - containerPort: 80
