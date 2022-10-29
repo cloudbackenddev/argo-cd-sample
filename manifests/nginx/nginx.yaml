@@ -50,7 +50,7 @@ metadata:
   name: erog-app
   namespace: erog-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: erog-app
