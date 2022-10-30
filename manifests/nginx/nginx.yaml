@@ -25,14 +25,14 @@ metadata:
   namespace: erog-app
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging-dns
+    kubernetes.io/ingress.class: nginx
 spec:
-  ingressClassName: nginx
   tls:
     - hosts:
-        - nginx.k8s.staging.learncloud.ga # This should match a DNS name in the Certificate
+        - nginx.k8s.staging.buildthecloud.in # This should match a DNS name in the Certificate
       secretName: nginx-tls # This should match the Certificate secretName
   rules:
-    - host: nginx.k8s.staging.learncloud.ga
+    - host: nginx.k8s.staging.buildthecloud.in
       http:
         paths:
           - pathType: Prefix
